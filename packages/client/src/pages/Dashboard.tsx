@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { useDashboardStats } from '../hooks/useDashboardStats'
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', {
@@ -9,8 +10,14 @@ function formatDate(dateStr: string) {
   })
 }
 
+function formatVolume(kg: number): string {
+  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}k`
+  return Math.round(kg).toLocaleString()
+}
+
 export default function Dashboard() {
   const { workouts, loading, error } = useWorkouts(10)
+  const { stats } = useDashboardStats()
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -23,6 +30,64 @@ export default function Dashboard() {
           + Start workout
         </Link>
       </div>
+
+      {/* Summary stat cards */}
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">This week</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+          {/* Workouts this week */}
+          <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-xs text-gray-500">Workouts</p>
+            <p className="mt-0.5 text-2xl font-bold text-gray-900">
+              {stats ? stats.workoutsThisWeek : '—'}
+            </p>
+            <p className="text-xs text-gray-400">this week</p>
+          </div>
+
+          {/* Volume this week */}
+          <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-xs text-gray-500">Volume</p>
+            <p className="mt-0.5 text-2xl font-bold text-gray-900">
+              {stats ? (stats.volumeThisWeek > 0 ? formatVolume(stats.volumeThisWeek) : '0') : '—'}
+            </p>
+            <p className="text-xs text-gray-400">kg lifted</p>
+          </div>
+
+          {/* Streak */}
+          <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-xs text-gray-500">Streak</p>
+            <p className="mt-0.5 text-2xl font-bold text-gray-900">
+              {stats ? stats.streak : '—'}
+            </p>
+            <p className="text-xs text-gray-400">day{stats?.streak !== 1 ? 's' : ''}</p>
+          </div>
+
+          {/* Body weight */}
+          <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-xs text-gray-500">Weight</p>
+            {stats?.latestWeight != null ? (
+              <>
+                <p className="mt-0.5 text-2xl font-bold text-gray-900">{stats.latestWeight}</p>
+                <p className="text-xs text-gray-400">
+                  kg
+                  {stats.weightChange !== null && (
+                    <span className={stats.weightChange > 0 ? ' text-red-400' : ' text-green-500'}>
+                      {' '}{stats.weightChange > 0 ? '+' : ''}{stats.weightChange}
+                    </span>
+                  )}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mt-0.5 text-base text-gray-300">—</p>
+                <Link to="/metrics" className="text-xs text-blue-500 hover:underline">Log weight</Link>
+              </>
+            )}
+          </div>
+
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
