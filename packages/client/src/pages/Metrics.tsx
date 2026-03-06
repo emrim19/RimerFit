@@ -149,6 +149,7 @@ export default function Metrics() {
             <span className="text-xs font-medium text-gray-500">Date</span>
             <input
               type="date"
+              lang="en-GB"
               value={form.date}
               onChange={e => field('date', e.target.value)}
               className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
