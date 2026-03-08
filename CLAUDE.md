@@ -252,6 +252,38 @@ CREATE POLICY "Users see own template exercises"
   ON workout_template_exercises FOR ALL
   USING (template_id IN (SELECT id FROM workout_templates WHERE user_id = auth.uid()));
 
+-- Muscle groups (shared defaults + user custom)
+CREATE TABLE muscle_groups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- NULL = built-in default
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE muscle_groups ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see defaults and own muscle groups"
+  ON muscle_groups FOR SELECT
+  USING (user_id IS NULL OR auth.uid() = user_id);
+
+CREATE POLICY "Users insert own muscle groups"
+  ON muscle_groups FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users update own muscle groups"
+  ON muscle_groups FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users delete own muscle groups"
+  ON muscle_groups FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Seed default muscle groups
+INSERT INTO muscle_groups (name, user_id) VALUES
+  ('chest', NULL), ('back', NULL), ('shoulders', NULL),
+  ('biceps', NULL), ('triceps', NULL), ('legs', NULL),
+  ('core', NULL), ('cardio', NULL);
+
 -- Seed common exercises
 INSERT INTO exercises (name, muscle_group, type) VALUES
   ('Bench Press', 'chest', 'strength'),
