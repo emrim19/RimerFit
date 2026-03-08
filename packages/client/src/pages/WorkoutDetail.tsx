@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { SetInputs, emptySet, setTypeLabel, inputCls } from '../components/SetInputs'
 import type { SetRow, ExerciseType } from '../components/SetInputs'
+import ExercisePicker from '../components/ExercisePicker'
+import { useExercises } from '../hooks/useExercises'
+import type { Exercise } from '../hooks/useExercises'
 
 // ── Data types ────────────────────────────────────────────────
 
@@ -99,6 +102,9 @@ export default function WorkoutDetail() {
   const [editTitle, setEditTitle] = useState('')
   const [editGroups, setEditGroups] = useState<EditGroup[]>([])
   const [saving, setSaving] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  const { exercises, refetch: refetchExercises } = useExercises()
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -170,6 +176,24 @@ export default function WorkoutDetail() {
     setEditGroups(prev =>
       prev.map((g, i) => i !== gi ? g : { ...g, sets: g.sets.filter((_, j) => j !== si) })
     )
+  }
+
+  function addExerciseToEdit(exercise: Exercise) {
+    setEditGroups(prev => [
+      ...prev,
+      { exercise_id: exercise.id, name: exercise.name, type: exercise.type, sets: [{ id: '', ...emptySet() }] },
+    ])
+  }
+
+  async function createExercise(data: { name: string; type: Exercise['type']; muscle_group: string | null }): Promise<Exercise> {
+    const { data: created, error } = await supabase
+      .from('exercises')
+      .insert(data)
+      .select('id, name, muscle_group, type')
+      .single()
+    if (error || !created) throw new Error(error?.message ?? 'Failed to create exercise')
+    await refetchExercises()
+    return created as Exercise
   }
 
   async function handleSave() {
@@ -305,6 +329,15 @@ export default function WorkoutDetail() {
         ))}
       </div>
 
+      {editing && (
+        <button
+          onClick={() => setPickerOpen(true)}
+          className="mt-3 w-full rounded-xl border border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"
+        >
+          + Add exercise
+        </button>
+      )}
+
       {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
       {/* Actions */}
@@ -369,6 +402,15 @@ export default function WorkoutDetail() {
           </div>
         )}
       </div>
+      {pickerOpen && (
+        <ExercisePicker
+          exercises={exercises}
+          addedIds={new Set(editGroups.map(g => g.exercise_id))}
+          onSelect={addExerciseToEdit}
+          onCreate={createExercise}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   )
 }
