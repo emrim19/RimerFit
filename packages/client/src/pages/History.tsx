@@ -18,7 +18,7 @@ function monthLabel(dateStr: string) {
 }
 
 function monthKey(dateStr: string) {
-  return dateStr.slice(0, 7) // "YYYY-MM"
+  return dateStr.slice(0, 7)
 }
 
 function groupByMonth(workouts: Workout[]): [string, Workout[]][] {
@@ -41,26 +41,26 @@ export default function History() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">History</h1>
+          <h1 className="text-2xl font-bold text-stone-100">History</h1>
           {!loading && (
-            <p className="mt-0.5 text-sm text-gray-400">
+            <p className="mt-0.5 text-sm text-stone-500">
               {workouts.length} {workouts.length === 1 ? 'workout' : 'workouts'} total
             </p>
           )}
         </div>
         <Link
           to="/log"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-600"
         >
           + Start workout
         </Link>
       </div>
 
-      {loading && <p className="text-sm text-gray-400">Loading…</p>}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {loading && <p className="text-sm text-stone-500">Loading…</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {!loading && !error && workouts.length === 0 && (
-        <p className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-400">
+        <p className="rounded-xl border border-dashed border-stone-700 py-12 text-center text-sm text-stone-500">
           No workouts yet — hit <strong>Start workout</strong> to log your first session.
         </p>
       )}
@@ -69,10 +69,10 @@ export default function History() {
         {groups.map(([key, group]) => (
           <section key={key}>
             <div className="mb-2 flex items-center gap-3">
-              <h2 className="text-sm font-semibold text-gray-500">
+              <h2 className="text-sm font-semibold text-stone-400">
                 {monthLabel(group[0].date)}
               </h2>
-              <span className="text-xs text-gray-300">
+              <span className="text-xs text-stone-600">
                 {group.length} {group.length === 1 ? 'session' : 'sessions'}
               </span>
             </div>
@@ -84,20 +84,20 @@ export default function History() {
                     to={`/workout/${w.id}`}
                     className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${
                       w.is_rest_day
-                        ? 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                        ? 'border-stone-700 bg-stone-800 hover:bg-stone-700'
+                        : 'border-stone-700 bg-stone-900 hover:border-stone-600 hover:bg-stone-800'
                     }`}
                   >
                     <div>
                       <div className="flex items-center gap-2">
                         {w.is_rest_day && <span className="text-base leading-none">😴</span>}
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-stone-100">
                           {w.is_rest_day ? (w.title ?? 'Rest Day') : (w.title ?? 'Workout')}
                         </p>
                       </div>
-                      <p className="text-sm text-gray-400">{formatDay(w.date)}</p>
+                      <p className="text-sm text-stone-500">{formatDay(w.date)}</p>
                     </div>
-                    <span className="text-sm text-gray-400">
+                    <span className="text-sm text-stone-500">
                       {w.is_rest_day ? '😴' : w.duration_minutes ? `${w.duration_minutes} min` : '›'}
                     </span>
                   </Link>

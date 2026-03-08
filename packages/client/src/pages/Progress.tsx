@@ -87,9 +87,9 @@ function formatVolume(kg: number) {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400">{label}</p>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <div className="rounded-xl border border-stone-700 bg-stone-900 p-4">
+      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
+      <p className="text-2xl font-bold text-stone-100">{value}</p>
     </div>
   )
 }
@@ -107,7 +107,7 @@ function BarChart({ sessions, type }: { sessions: Session[]; type: ExerciseType 
           return (
             <div
               key={s.workout_id}
-              className="flex-1 rounded-t-sm bg-blue-500"
+              className="flex-1 rounded-t-sm bg-amber-500"
               style={{ height: `${Math.max(pct, 2)}%` }}
             />
           )
@@ -116,7 +116,7 @@ function BarChart({ sessions, type }: { sessions: Session[]; type: ExerciseType 
       <div className="mt-1 flex gap-1">
         {visible.map(s => (
           <div key={s.workout_id} className="flex-1 overflow-hidden text-center">
-            <span className="text-[10px] text-gray-300">{formatDate(s.date)}</span>
+            <span className="text-[10px] text-stone-600">{formatDate(s.date)}</span>
           </div>
         ))}
       </div>
@@ -136,7 +136,6 @@ function StatsView({
   const type = exercise.type
   const recent = [...sessions].reverse()
 
-  // PR stats
   const prWeight = sessions.reduce((m, s) => Math.max(m, s.bestWeight ?? 0), 0)
   const prE1RM = sessions.reduce((m, s) => Math.max(m, s.bestE1RM ?? 0), 0)
   const prReps = sessions.reduce((m, s) => Math.max(m, s.bestReps ?? 0), 0)
@@ -146,18 +145,17 @@ function StatsView({
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-6">
-        <button onClick={onBack} className="mb-3 text-sm text-gray-400 hover:text-gray-700">
+        <button onClick={onBack} className="mb-3 text-sm text-stone-500 hover:text-stone-200">
           ← Change exercise
         </button>
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-gray-900">{exercise.name}</h2>
-          <span className="rounded-full border border-gray-200 px-2 py-0.5 text-xs capitalize text-gray-400">
+          <h2 className="text-2xl font-bold text-stone-100">{exercise.name}</h2>
+          <span className="rounded-full border border-stone-700 px-2 py-0.5 text-xs capitalize text-stone-500">
             {exercise.type}
           </span>
         </div>
-        <p className="mt-0.5 text-sm text-gray-400">
+        <p className="mt-0.5 text-sm text-stone-500">
           {sessions.length} {sessions.length === 1 ? 'session' : 'sessions'} logged
         </p>
       </div>
@@ -188,8 +186,8 @@ function StatsView({
 
       {/* Chart */}
       {sessions.length > 1 && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <div className="mb-6 rounded-xl border border-stone-700 bg-stone-900 p-4">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-stone-500">
             {type === 'strength' ? 'Est. 1RM per session (Epley)' : type === 'cardio' ? 'Duration per session' : 'Best reps per session'}
           </p>
           <BarChart sessions={sessions} type={type} />
@@ -198,30 +196,30 @@ function StatsView({
 
       {/* Session history */}
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Sessions</p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">Sessions</p>
         <ul className="space-y-2">
           {recent.map(s => (
             <li key={s.workout_id}>
               <Link
                 to={`/workout/${s.workout_id}`}
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                className="flex items-center justify-between rounded-xl border border-stone-700 bg-stone-900 px-4 py-3 transition-colors hover:border-stone-600 hover:bg-stone-800"
               >
                 <div>
-                  <p className="font-medium text-gray-900">{s.title ?? 'Workout'}</p>
-                  <p className="text-sm text-gray-400">{formatDate(s.date)}</p>
+                  <p className="font-medium text-stone-100">{s.title ?? 'Workout'}</p>
+                  <p className="text-sm text-stone-500">{formatDate(s.date)}</p>
                 </div>
                 <div className="text-right">
                   {type === 'strength' && (
                     <>
-                      {s.bestE1RM && <p className="text-sm font-medium text-gray-700">{s.bestE1RM} kg e1RM</p>}
-                      {s.bestWeight && <p className="text-xs text-gray-400">{s.bestWeight} kg top set</p>}
+                      {s.bestE1RM && <p className="text-sm font-medium text-stone-200">{s.bestE1RM} kg e1RM</p>}
+                      {s.bestWeight && <p className="text-xs text-stone-500">{s.bestWeight} kg top set</p>}
                     </>
                   )}
                   {type === 'cardio' && s.bestDuration && (
-                    <p className="text-sm font-medium text-gray-600">{formatDuration(s.bestDuration)}</p>
+                    <p className="text-sm font-medium text-stone-300">{formatDuration(s.bestDuration)}</p>
                   )}
                   {type === 'bodyweight' && s.bestReps && (
-                    <p className="text-sm font-medium text-gray-600">{s.bestReps} reps</p>
+                    <p className="text-sm font-medium text-stone-300">{s.bestReps} reps</p>
                   )}
                 </div>
               </Link>
@@ -257,14 +255,14 @@ function ExerciseSelector({
           value={search}
           onChange={e => setSearch(e.target.value)}
           autoFocus
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-stone-700 bg-stone-800 px-3 py-2 text-sm text-stone-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
         />
       </div>
 
-      {loading && <p className="text-sm text-gray-400">Loading…</p>}
+      {loading && <p className="text-sm text-stone-500">Loading…</p>}
 
       {!loading && filtered.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-400">
+        <p className="py-8 text-center text-sm text-stone-500">
           {search ? 'No exercises found.' : 'No exercises logged yet — start by logging a workout.'}
         </p>
       )}
@@ -274,15 +272,15 @@ function ExerciseSelector({
           <li key={ex.id}>
             <button
               onClick={() => onSelect(ex)}
-              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left transition-colors hover:border-gray-300 hover:bg-gray-50"
+              className="flex w-full items-center justify-between rounded-xl border border-stone-700 bg-stone-900 px-4 py-3 text-left transition-colors hover:border-stone-600 hover:bg-stone-800"
             >
               <div>
-                <p className="font-medium text-gray-900">{ex.name}</p>
-                <p className="text-sm capitalize text-gray-400">
+                <p className="font-medium text-stone-100">{ex.name}</p>
+                <p className="text-sm capitalize text-stone-500">
                   {ex.muscle_group ?? ex.type}
                 </p>
               </div>
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-stone-500">
                 {ex.session_count} {ex.session_count === 1 ? 'session' : 'sessions'}
               </span>
             </button>
@@ -303,7 +301,6 @@ export default function Progress() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [statsLoading, setStatsLoading] = useState(false)
 
-  // Fetch exercises that have at least one logged set, with session counts
   useEffect(() => {
     supabase
       .from('workout_sets')
@@ -311,7 +308,6 @@ export default function Progress() {
       .then(({ data }) => {
         if (!data) { setExercisesLoading(false); return }
 
-        // Count distinct workout_ids per exercise
         const sessionMap = new Map<string, Set<string>>()
         const exerciseMap = new Map<string, Exercise>()
 
@@ -334,7 +330,6 @@ export default function Progress() {
       })
   }, [])
 
-  // Fetch stats when exercise is selected
   useEffect(() => {
     if (!selected) return
     setStatsLoading(true)
@@ -350,7 +345,7 @@ export default function Progress() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Progress</h1>
+      <h1 className="mb-6 text-2xl font-bold text-stone-100">Progress</h1>
 
       {!selected ? (
         <ExerciseSelector
@@ -359,7 +354,7 @@ export default function Progress() {
           onSelect={ex => { setSelected(ex); setSessions([]) }}
         />
       ) : statsLoading ? (
-        <p className="text-sm text-gray-400">Loading…</p>
+        <p className="text-sm text-stone-500">Loading…</p>
       ) : (
         <StatsView
           exercise={selected}

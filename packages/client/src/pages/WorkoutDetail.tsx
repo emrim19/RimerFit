@@ -271,7 +271,7 @@ export default function WorkoutDetail() {
   if (notFound) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="text-gray-500">Workout not found.</p>
+        <p className="text-stone-500">Workout not found.</p>
       </div>
     )
   }
@@ -297,28 +297,28 @@ export default function WorkoutDetail() {
             />
           </>
         ) : (
-          <h1 className="text-2xl font-bold text-gray-900">{workout?.title ?? 'Workout'}</h1>
+          <h1 className="text-2xl font-bold text-stone-100">{workout?.title ?? 'Workout'}</h1>
         )}
-        {!editing && <p className="mt-1 text-sm text-gray-500">{workout && formatDate(workout.date)}</p>}
+        {!editing && <p className="mt-1 text-sm text-stone-500">{workout && formatDate(workout.date)}</p>}
       </div>
 
       {/* Rest day banner */}
       {workout?.is_rest_day && (
-        <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-6 text-center">
+        <div className="mb-4 rounded-xl border border-stone-700 bg-stone-900 px-4 py-6 text-center">
           <p className="text-2xl">😴</p>
-          <p className="mt-2 font-medium text-gray-700">Rest Day</p>
-          <p className="mt-1 text-sm text-gray-400">Recovery counts.</p>
+          <p className="mt-2 font-medium text-stone-200">Rest Day</p>
+          <p className="mt-1 text-sm text-stone-500">Recovery counts.</p>
         </div>
       )}
 
       {/* Exercise groups */}
       {!workout?.is_rest_day && <div className="space-y-4">
         {(editing ? editGroups : groups).map((group, gi) => (
-          <div key={group.exercise_id} className="rounded-xl border border-gray-200 bg-white p-4">
+          <div key={group.exercise_id} className="rounded-xl border border-stone-700 bg-stone-900 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h2 className="font-semibold text-gray-900">{group.name}</h2>
-                <p className="text-xs text-gray-400">{setTypeLabel(group.type)}</p>
+                <h2 className="font-semibold text-stone-100">{group.name}</h2>
+                <p className="text-xs text-stone-500">{setTypeLabel(group.type)}</p>
               </div>
             </div>
 
@@ -327,7 +327,7 @@ export default function WorkoutDetail() {
               <div className="space-y-2">
                 {(group as EditGroup).sets.map((s, si) => (
                   <div key={si} className="flex items-center gap-2">
-                    <span className="w-6 text-center text-xs text-gray-400">{si + 1}</span>
+                    <span className="w-6 text-center text-xs text-stone-600">{si + 1}</span>
                     <SetInputs
                       type={group.type}
                       set={s}
@@ -335,7 +335,7 @@ export default function WorkoutDetail() {
                     />
                     <button
                       onClick={() => removeEditSet(gi, si)}
-                      className="text-xs text-gray-300 hover:text-red-400"
+                      className="text-xs text-stone-600 hover:text-red-400"
                     >
                       ✕
                     </button>
@@ -343,7 +343,7 @@ export default function WorkoutDetail() {
                 ))}
                 <button
                   onClick={() => addEditSet(gi)}
-                  className="mt-1 text-sm text-blue-600 hover:underline"
+                  className="mt-1 text-sm text-amber-500 hover:underline"
                 >
                   + Add set
                 </button>
@@ -353,8 +353,8 @@ export default function WorkoutDetail() {
               <ul className="space-y-1">
                 {(group as ExerciseGroup).sets.map((s, si) => (
                   <li key={s.id} className="flex items-center gap-3 text-sm">
-                    <span className="w-6 text-center text-xs text-gray-400">{si + 1}</span>
-                    <span className="text-gray-800">{formatSet(s, group.type)}</span>
+                    <span className="w-6 text-center text-xs text-stone-600">{si + 1}</span>
+                    <span className="text-stone-200">{formatSet(s, group.type)}</span>
                   </li>
                 ))}
               </ul>
@@ -366,13 +366,13 @@ export default function WorkoutDetail() {
       {!workout?.is_rest_day && editing && (
         <button
           onClick={() => setPickerOpen(true)}
-          className="mt-3 w-full rounded-xl border border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"
+          className="mt-3 w-full rounded-xl border border-dashed border-stone-700 py-3 text-sm font-medium text-stone-400 hover:border-amber-500 hover:text-amber-500"
         >
           + Add exercise
         </button>
       )}
 
-      {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
+      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
       {/* Actions */}
       <div className="mt-8">
@@ -380,27 +380,27 @@ export default function WorkoutDetail() {
           <div className="flex gap-3">
             <button
               onClick={() => setEditing(false)}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              className="rounded-lg border border-stone-700 px-4 py-2 text-sm text-stone-300 hover:bg-stone-800"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-amber-500 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-600 disabled:opacity-50"
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         ) : confirmDelete ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-            <p className="mb-3 text-sm font-medium text-red-700">
+          <div className="rounded-xl border border-red-900 bg-red-950 p-4">
+            <p className="mb-3 text-sm font-medium text-red-400">
               Delete this workout? This cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                className="rounded-lg border border-stone-700 bg-stone-900 px-4 py-2 text-sm text-stone-300 hover:bg-stone-800"
               >
                 Cancel
               </button>
@@ -417,19 +417,19 @@ export default function WorkoutDetail() {
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/')}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              className="rounded-lg border border-stone-700 px-4 py-2 text-sm text-stone-300 hover:bg-stone-800"
             >
               ← Back
             </button>
             <button
               onClick={enterEdit}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-stone-700 px-4 py-2 text-sm font-medium text-stone-200 hover:bg-stone-800"
             >
               Edit
             </button>
             <button
               onClick={() => setConfirmDelete(true)}
-              className="ml-auto rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+              className="ml-auto rounded-lg border border-red-800 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-950"
             >
               Delete
             </button>

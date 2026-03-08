@@ -7,7 +7,7 @@ import { useBodyMetrics, type NewBodyMetric } from '../hooks/useBodyMetrics'
 type MetricKey = 'weight_kg' | 'body_fat_pct' | 'muscle_mass_kg'
 
 const METRIC_CONFIG: Record<MetricKey, { label: string; unit: string; color: string }> = {
-  weight_kg:      { label: 'Weight',      unit: 'kg', color: '#3b82f6' },
+  weight_kg:      { label: 'Weight',      unit: 'kg', color: '#f59e0b' },
   body_fat_pct:   { label: 'Body fat',    unit: '%',  color: '#f97316' },
   muscle_mass_kg: { label: 'Muscle mass', unit: 'kg', color: '#22c55e' },
 }
@@ -40,6 +40,8 @@ const FORM_FIELDS: { key: keyof Omit<FormState, 'date' | 'notes'>; label: string
   { key: 'body_fat_pct',   label: 'Body fat (%)',     placeholder: '15.0' },
   { key: 'muscle_mass_kg', label: 'Muscle mass (kg)', placeholder: '60.0' },
 ]
+
+const inputCls = 'rounded-lg border border-stone-700 bg-stone-800 px-3 py-2 text-sm text-stone-100 focus:border-amber-500 focus:outline-none'
 
 export default function Metrics() {
   const { metrics, loading, error, saveMetric, updateMetric, deleteMetric } = useBodyMetrics()
@@ -128,10 +130,10 @@ export default function Metrics() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Body Metrics</h1>
+        <h1 className="text-2xl font-bold text-stone-100">Body Metrics</h1>
         <button
           onClick={() => showForm ? cancelForm() : setShowForm(true)}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-600"
         >
           {showForm ? 'Cancel' : '+ Log metrics'}
         </button>
@@ -141,26 +143,26 @@ export default function Metrics() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-8 rounded-xl border border-gray-200 bg-white p-5 space-y-4"
+          className="mb-8 rounded-xl border border-stone-700 bg-stone-900 p-5 space-y-4"
         >
-          <h2 className="font-semibold text-gray-900">{editingId ? 'Edit entry' : 'New entry'}</h2>
+          <h2 className="font-semibold text-stone-100">{editingId ? 'Edit entry' : 'New entry'}</h2>
 
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-gray-500">Date</span>
+            <span className="text-xs font-medium text-stone-400">Date</span>
             <input
               type="date"
               lang="en-GB"
               value={form.date}
               onChange={e => field('date', e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+              className={inputCls}
             />
           </label>
 
           <div className="grid grid-cols-2 gap-4">
             {FORM_FIELDS.map(({ key, label, placeholder }) => (
               <label key={key} className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-gray-500">
-                  {label} <span className="font-normal text-gray-400">optional</span>
+                <span className="text-xs font-medium text-stone-400">
+                  {label} <span className="font-normal text-stone-500">optional</span>
                 </span>
                 <input
                   type="number"
@@ -169,44 +171,42 @@ export default function Metrics() {
                   placeholder={placeholder}
                   value={form[key]}
                   onChange={e => field(key, e.target.value)}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+                  className={inputCls}
                 />
               </label>
             ))}
           </div>
 
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-gray-500">
-              Notes <span className="font-normal text-gray-400">optional</span>
+            <span className="text-xs font-medium text-stone-400">
+              Notes <span className="font-normal text-stone-500">optional</span>
             </span>
             <input
               type="text"
               placeholder="e.g. morning, before breakfast"
               value={form.notes}
               onChange={e => field('notes', e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+              className={inputCls}
             />
           </label>
 
-          {formError && <p className="text-sm text-red-500">{formError}</p>}
+          {formError && <p className="text-sm text-red-400">{formError}</p>}
 
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-amber-500 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-600 disabled:opacity-50"
           >
             {saving ? 'Saving…' : editingId ? 'Update entry' : 'Save entry'}
           </button>
         </form>
       )}
 
-      {/* Loading / error */}
-      {loading && <p className="text-sm text-gray-400">Loading…</p>}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {loading && <p className="text-sm text-stone-500">Loading…</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {/* Empty state */}
       {!loading && !error && metrics.length === 0 && (
-        <p className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-400">
+        <p className="rounded-xl border border-dashed border-stone-700 py-12 text-center text-sm text-stone-500">
           No entries yet — hit <strong>Log metrics</strong> to track your first measurement.
         </p>
       )}
@@ -216,7 +216,7 @@ export default function Metrics() {
           {/* Latest snapshot */}
           {latest && (
             <section className="mb-8">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Latest</h2>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-400">Latest</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {(
                   [
@@ -226,15 +226,15 @@ export default function Metrics() {
                     ['Muscle mass', latest.muscle_mass_kg, 'kg'],
                   ] as [string, number | null, string][]
                 ).map(([label, val, unit]) => (
-                  <div key={label} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                    <p className="text-xs text-gray-500">{label}</p>
+                  <div key={label} className="rounded-xl border border-stone-700 bg-stone-900 px-4 py-3">
+                    <p className="text-xs text-stone-400">{label}</p>
                     {val !== null ? (
                       <>
-                        <p className="mt-0.5 text-xl font-bold text-gray-900">{val}</p>
-                        <p className="text-xs text-gray-400">{unit}</p>
+                        <p className="mt-0.5 text-xl font-bold text-stone-100">{val}</p>
+                        <p className="text-xs text-stone-500">{unit}</p>
                       </>
                     ) : (
-                      <p className="mt-0.5 text-base text-gray-300">—</p>
+                      <p className="mt-0.5 text-base text-stone-600">—</p>
                     )}
                   </div>
                 ))}
@@ -245,7 +245,7 @@ export default function Metrics() {
           {/* Progress chart */}
           <section className="mb-8">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Progress</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-400">Progress</h2>
               <div className="flex gap-2">
                 {(Object.entries(METRIC_CONFIG) as [MetricKey, typeof METRIC_CONFIG[MetricKey]][]).map(([key, c]) => (
                   <button
@@ -253,8 +253,8 @@ export default function Metrics() {
                     onClick={() => setActiveMetric(key)}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       activeMetric === key
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'bg-amber-500 text-stone-950'
+                        : 'bg-stone-800 text-stone-400 hover:bg-stone-700'
                     }`}
                   >
                     {c.label}
@@ -264,17 +264,17 @@ export default function Metrics() {
             </div>
 
             {chartData.length < 2 ? (
-              <p className="text-sm text-gray-400">Log at least 2 entries to see a trend.</p>
+              <p className="text-sm text-stone-500">Log at least 2 entries to see a trend.</p>
             ) : (
-              <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <div className="rounded-xl border border-stone-700 bg-stone-900 p-4">
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-                    <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} domain={['auto', 'auto']} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#292524" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#78716c' }} />
+                    <YAxis tick={{ fontSize: 11, fill: '#78716c' }} domain={['auto', 'auto']} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? [`${v} ${cfg.unit}`, cfg.label] : ['-', cfg.label]}
-                      contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }}
+                      contentStyle={{ borderRadius: 8, border: '1px solid #44403c', background: '#1c1917', color: '#f5f4f2', fontSize: 12 }}
                     />
                     <Line
                       type="monotone"
@@ -292,11 +292,11 @@ export default function Metrics() {
 
           {/* History table */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">History</h2>
-            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-400">History</h2>
+            <div className="overflow-x-auto rounded-xl border border-stone-700 bg-stone-900">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-xs text-gray-500">
+                  <tr className="border-b border-stone-800 text-xs text-stone-400">
                     <th className="px-4 py-2 text-left font-medium">Date</th>
                     <th className="px-4 py-2 text-right font-medium">Weight</th>
                     <th className="px-4 py-2 text-right font-medium">Height</th>
@@ -307,18 +307,18 @@ export default function Metrics() {
                 </thead>
                 <tbody>
                   {[...metrics].reverse().map(m => (
-                    <tr key={m.id} className="border-b border-gray-50 last:border-0">
-                      <td className="px-4 py-2 text-gray-700">{formatDate(m.date)}</td>
-                      <td className="px-4 py-2 text-right text-gray-700">
+                    <tr key={m.id} className="border-b border-stone-800 last:border-0">
+                      <td className="px-4 py-2 text-stone-200">{formatDate(m.date)}</td>
+                      <td className="px-4 py-2 text-right text-stone-200">
                         {m.weight_kg      !== null ? `${m.weight_kg} kg`      : '—'}
                       </td>
-                      <td className="px-4 py-2 text-right text-gray-700">
+                      <td className="px-4 py-2 text-right text-stone-200">
                         {m.height_cm      !== null ? `${m.height_cm} cm`      : '—'}
                       </td>
-                      <td className="px-4 py-2 text-right text-gray-700">
+                      <td className="px-4 py-2 text-right text-stone-200">
                         {m.body_fat_pct   !== null ? `${m.body_fat_pct}%`     : '—'}
                       </td>
-                      <td className="px-4 py-2 text-right text-gray-700">
+                      <td className="px-4 py-2 text-right text-stone-200">
                         {m.muscle_mass_kg !== null ? `${m.muscle_mass_kg} kg` : '—'}
                       </td>
                       <td className="px-4 py-2">
@@ -326,13 +326,13 @@ export default function Metrics() {
                           <span className="flex items-center gap-2">
                             <button
                               onClick={() => handleDelete(m.id)}
-                              className="text-xs font-medium text-red-500 hover:text-red-700"
+                              className="text-xs font-medium text-red-400 hover:text-red-300"
                             >
                               Confirm
                             </button>
                             <button
                               onClick={() => setDeletingId(null)}
-                              className="text-xs text-gray-400 hover:text-gray-600"
+                              className="text-xs text-stone-500 hover:text-stone-300"
                             >
                               No
                             </button>
@@ -341,7 +341,7 @@ export default function Metrics() {
                           <span className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => startEdit(m)}
-                              className="text-gray-400 hover:text-gray-700"
+                              className="text-stone-500 hover:text-stone-200"
                               title="Edit"
                             >
                               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -350,7 +350,7 @@ export default function Metrics() {
                             </button>
                             <button
                               onClick={() => setDeletingId(m.id)}
-                              className="text-gray-400 hover:text-red-500"
+                              className="text-stone-500 hover:text-red-400"
                               title="Delete"
                             >
                               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">

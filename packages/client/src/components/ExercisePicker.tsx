@@ -54,11 +54,11 @@ export default function ExercisePicker({ exercises, addedIds, onSelect, onCreate
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center"
       onClick={onClose}
     >
       <div
-        className="flex h-[80vh] w-full flex-col rounded-t-2xl bg-white sm:h-[70vh] sm:max-w-md sm:rounded-2xl"
+        className="flex h-[80vh] w-full flex-col rounded-t-2xl bg-stone-900 sm:h-[70vh] sm:max-w-md sm:rounded-2xl"
         onClick={e => e.stopPropagation()}
       >
         {mode === 'browse' ? (
@@ -112,9 +112,9 @@ function BrowseView({
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-        <h2 className="font-semibold text-gray-900">Add exercise</h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+      <div className="flex items-center justify-between border-b border-stone-800 px-4 py-3">
+        <h2 className="font-semibold text-stone-100">Add exercise</h2>
+        <button onClick={onClose} className="text-stone-500 hover:text-stone-200">✕</button>
       </div>
 
       <div className="px-4 py-3">
@@ -124,17 +124,17 @@ function BrowseView({
           placeholder="Search…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-stone-700 bg-stone-800 px-3 py-2 text-sm text-stone-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
         />
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-2">
         {groups.length === 0 && (
-          <p className="py-8 text-center text-sm text-gray-400">No exercises found.</p>
+          <p className="py-8 text-center text-sm text-stone-500">No exercises found.</p>
         )}
         {groups.map(([group, exs]) => (
           <div key={group} className="mb-4">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400 capitalize">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-500 capitalize">
               {group}
             </p>
             <ul className="space-y-1">
@@ -146,11 +146,11 @@ function BrowseView({
                       disabled={added}
                       onClick={() => onSelect(ex)}
                       className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                        added ? 'cursor-default text-gray-300' : 'text-gray-900 hover:bg-gray-50'
+                        added ? 'cursor-default text-stone-600' : 'text-stone-100 hover:bg-stone-800'
                       }`}
                     >
                       <span>{ex.name}</span>
-                      {added && <span className="text-xs text-gray-300">Added</span>}
+                      {added && <span className="text-xs text-stone-600">Added</span>}
                     </button>
                   </li>
                 )
@@ -160,10 +160,10 @@ function BrowseView({
         ))}
       </div>
 
-      <div className="border-t border-gray-100 px-4 py-3">
+      <div className="border-t border-stone-800 px-4 py-3">
         <button
           onClick={onCreateClick}
-          className="w-full rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"
+          className="w-full rounded-lg border border-dashed border-stone-700 py-2 text-sm font-medium text-stone-400 hover:border-amber-500 hover:text-amber-500"
         >
           + Create custom exercise
         </button>
@@ -208,26 +208,26 @@ function CreateView({
 
   return (
     <>
-      <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-        <button onClick={onBack} className="text-gray-400 hover:text-gray-600">←</button>
-        <h2 className="font-semibold text-gray-900">Create exercise</h2>
+      <div className="flex items-center gap-2 border-b border-stone-800 px-4 py-3">
+        <button onClick={onBack} className="text-stone-500 hover:text-stone-200">←</button>
+        <h2 className="font-semibold text-stone-100">Create exercise</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
+          <label className="mb-1 block text-sm font-medium text-stone-200">Name</label>
           <input
             type="text"
             placeholder="e.g. Cable Fly"
             value={name}
             onChange={e => setName(e.target.value)}
             autoFocus
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-stone-700 bg-stone-800 px-3 py-2 text-sm text-stone-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Type</label>
+          <label className="mb-1 block text-sm font-medium text-stone-200">Type</label>
           <div className="flex gap-2">
             {(['strength', 'bodyweight', 'cardio'] as const).map(t => (
               <button
@@ -236,8 +236,8 @@ function CreateView({
                 onClick={() => setType(t)}
                 className={`flex-1 rounded-lg border py-2 text-sm font-medium capitalize transition-colors ${
                   type === t
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    ? 'border-amber-500 bg-amber-950 text-amber-400'
+                    : 'border-stone-700 text-stone-400 hover:border-stone-600'
                 }`}
               >
                 {t}
@@ -248,15 +248,15 @@ function CreateView({
 
         {!isCardio && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Muscle group <span className="font-normal text-gray-400">(optional)</span>
+            <label className="mb-1 block text-sm font-medium text-stone-200">
+              Muscle group <span className="font-normal text-stone-500">(optional)</span>
             </label>
             <input
               list="muscle-group-options"
               placeholder="e.g. chest, back, legs…"
               value={muscleGroup}
               onChange={e => setMuscleGroup(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-stone-700 bg-stone-800 px-3 py-2 text-sm text-stone-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
             />
             <datalist id="muscle-group-options">
               {MUSCLE_GROUPS.map(g => <option key={g} value={g} />)}
@@ -264,12 +264,12 @@ function CreateView({
           </div>
         )}
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-red-400">{error}</p>}
 
         <button
           type="submit"
           disabled={saving}
-          className="mt-auto w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="mt-auto w-full rounded-lg bg-amber-500 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-600 disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save exercise'}
         </button>

@@ -156,7 +156,7 @@ export default function LogWorkout() {
   function hasData(set: SetRow, type: ExerciseType) {
     if (type === 'strength') return set.reps || set.weight_kg
     if (type === 'cardio') return set.duration_minutes || set.distance_km
-    return set.reps // bodyweight
+    return set.reps
   }
 
   // ── Save workout ────────────────────────────────────────────
@@ -215,7 +215,7 @@ export default function LogWorkout() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Log workout</h1>
+      <h1 className="mb-6 text-2xl font-bold text-stone-100">Log workout</h1>
 
       {/* Type selector */}
       <div className="mb-6 flex gap-2">
@@ -225,8 +225,8 @@ export default function LogWorkout() {
             onClick={() => setIsRestDay(type === 'rest')}
             className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
               (type === 'rest') === isRestDay
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                ? 'border-amber-500 bg-amber-950 text-amber-400'
+                : 'border-stone-700 text-stone-400 hover:border-stone-600'
             }`}
           >
             {type === 'workout' ? 'Workout' : 'Rest Day'}
@@ -241,7 +241,7 @@ export default function LogWorkout() {
           placeholder={isRestDay ? 'Note (optional)' : 'Workout title (optional)'}
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-stone-700 bg-stone-800 px-3 py-2 text-sm text-stone-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
         />
       </div>
 
@@ -250,7 +250,7 @@ export default function LogWorkout() {
         <div className="mb-6">
           <button
             onClick={() => setTemplatePickerOpen(true)}
-            className="text-sm font-medium text-blue-600 hover:underline"
+            className="text-sm font-medium text-amber-500 hover:underline"
           >
             Use template
           </button>
@@ -258,10 +258,10 @@ export default function LogWorkout() {
       )}
 
       {isRestDay && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-white px-4 py-6 text-center">
+        <div className="mb-6 rounded-xl border border-stone-700 bg-stone-900 px-4 py-6 text-center">
           <p className="text-2xl">😴</p>
-          <p className="mt-2 font-medium text-gray-700">Rest Day</p>
-          <p className="mt-1 text-sm text-gray-400">Recovery counts — this will keep your streak alive.</p>
+          <p className="mt-2 font-medium text-stone-200">Rest Day</p>
+          <p className="mt-1 text-sm text-stone-500">Recovery counts — this will keep your streak alive.</p>
         </div>
       )}
 
@@ -269,15 +269,15 @@ export default function LogWorkout() {
       {!isRestDay && (
         <div className="space-y-4">
           {entries.map((entry, ei) => (
-            <div key={entry.exercise_id} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div key={entry.exercise_id} className="rounded-xl border border-stone-700 bg-stone-900 p-4">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h2 className="font-semibold text-gray-900">{entry.name}</h2>
-                  <p className="text-xs text-gray-400">{setTypeLabel(entry.type)}</p>
+                  <h2 className="font-semibold text-stone-100">{entry.name}</h2>
+                  <p className="text-xs text-stone-500">{setTypeLabel(entry.type)}</p>
                 </div>
                 <button
                   onClick={() => removeExercise(ei)}
-                  className="text-sm text-gray-400 hover:text-red-500"
+                  className="text-sm text-stone-500 hover:text-red-400"
                 >
                   Remove
                 </button>
@@ -286,7 +286,7 @@ export default function LogWorkout() {
               <div className="mb-2 space-y-2">
                 {entry.sets.map((set, si) => (
                   <div key={si} className="flex items-center gap-2">
-                    <span className="w-6 text-center text-xs text-gray-400">{si + 1}</span>
+                    <span className="w-6 text-center text-xs text-stone-600">{si + 1}</span>
                     <SetInputs
                       type={entry.type}
                       set={set}
@@ -295,7 +295,7 @@ export default function LogWorkout() {
                     {entry.sets.length > 1 && (
                       <button
                         onClick={() => removeSet(ei, si)}
-                        className="text-xs text-gray-300 hover:text-red-400"
+                        className="text-xs text-stone-600 hover:text-red-400"
                       >
                         ✕
                       </button>
@@ -304,7 +304,7 @@ export default function LogWorkout() {
                 ))}
               </div>
 
-              <button onClick={() => addSet(ei)} className="text-sm text-blue-600 hover:underline">
+              <button onClick={() => addSet(ei)} className="text-sm text-amber-500 hover:underline">
                 + Add set
               </button>
             </div>
@@ -314,15 +314,13 @@ export default function LogWorkout() {
 
       {!isRestDay && (
         <>
-          {/* Add exercise */}
           <button
             onClick={() => setPickerOpen(true)}
-            className="mt-4 w-full rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"
+            className="mt-4 w-full rounded-xl border-2 border-dashed border-stone-700 py-3 text-sm font-medium text-stone-400 hover:border-amber-500 hover:text-amber-500"
           >
             + Add exercise
           </button>
 
-          {/* Save as template */}
           {entries.length > 0 && (
             <div className="mt-3">
               {showSaveTemplate ? (
@@ -334,18 +332,18 @@ export default function LogWorkout() {
                     onChange={e => setTemplateName(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSaveTemplate()}
                     autoFocus
-                    className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="min-w-0 flex-1 rounded-lg border border-stone-700 bg-stone-800 px-3 py-1.5 text-sm text-stone-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                   />
                   <button
                     onClick={handleSaveTemplate}
                     disabled={savingTemplate}
-                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                    className="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-stone-950 hover:bg-amber-600 disabled:opacity-50"
                   >
                     {savingTemplate ? 'Saving…' : 'Save'}
                   </button>
                   <button
                     onClick={() => { setShowSaveTemplate(false); setTemplateName(''); setTemplateError(null) }}
-                    className="text-sm text-gray-400 hover:text-gray-600"
+                    className="text-sm text-stone-500 hover:text-stone-300"
                   >
                     Cancel
                   </button>
@@ -353,12 +351,12 @@ export default function LogWorkout() {
               ) : (
                 <button
                   onClick={() => setShowSaveTemplate(true)}
-                  className="text-sm text-gray-400 hover:text-gray-600"
+                  className="text-sm text-stone-500 hover:text-stone-300"
                 >
                   Save as template
                 </button>
               )}
-              {templateError && <p className="mt-1 text-xs text-red-500">{templateError}</p>}
+              {templateError && <p className="mt-1 text-xs text-red-400">{templateError}</p>}
             </div>
           )}
 
@@ -385,18 +383,18 @@ export default function LogWorkout() {
 
       {/* Error + save */}
       <div className="mt-8 space-y-3">
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-red-400">{error}</p>}
         <div className="flex gap-3">
           <button
             onClick={() => navigate('/')}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            className="rounded-lg border border-stone-700 px-4 py-2 text-sm text-stone-300 hover:bg-stone-800"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 rounded-lg bg-amber-500 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-600 disabled:opacity-50"
           >
             {saving ? 'Saving…' : isRestDay ? 'Log rest day' : 'Save workout'}
           </button>
