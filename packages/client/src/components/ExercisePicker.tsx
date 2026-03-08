@@ -60,27 +60,33 @@ function ColorDot({
         type="button"
         title="Change colour"
         onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
-        className="h-3 w-3 rounded-full ring-1 ring-white/20 transition-transform hover:scale-125"
+        className="h-3.5 w-3.5 rounded-full ring-2 ring-white/10 transition-all hover:ring-white/30 hover:scale-110"
         style={{ backgroundColor: getColor(group) }}
       />
       {open && (
         <div
-          className="absolute left-0 top-5 z-10 rounded-xl border border-slate-700 bg-slate-800 p-2 shadow-xl"
+          className="absolute left-0 top-6 z-10 w-48 rounded-2xl border border-slate-700 bg-slate-800/95 p-4 shadow-2xl backdrop-blur-sm"
           onClick={e => e.stopPropagation()}
         >
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-slate-500 capitalize">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 capitalize">
             {group}
           </p>
-          <div className="grid grid-cols-6 gap-1.5">
-            {PRESET_COLORS.map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => { setColor(group, c); setOpen(false) }}
-                className="h-5 w-5 rounded-full ring-1 ring-white/10 transition-transform hover:scale-110"
-                style={{ backgroundColor: c, outline: getColor(group) === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }}
-              />
-            ))}
+          <div className="grid grid-cols-4 gap-2.5">
+            {PRESET_COLORS.map(c => {
+              const active = getColor(group) === c
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => { setColor(group, c); setOpen(false) }}
+                  className="h-8 w-8 rounded-xl transition-all hover:scale-110"
+                  style={{
+                    backgroundColor: c,
+                    boxShadow: active ? `0 0 0 3px #1e293b, 0 0 0 5px ${c}` : undefined,
+                  }}
+                />
+              )
+            })}
           </div>
         </div>
       )}
