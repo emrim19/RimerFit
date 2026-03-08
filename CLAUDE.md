@@ -226,6 +226,32 @@ ALTER TABLE body_metrics ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users see own body metrics"
   ON body_metrics FOR ALL USING (auth.uid() = user_id);
 
+-- Workout templates
+CREATE TABLE workout_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE workout_template_exercises (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  template_id UUID REFERENCES workout_templates(id) ON DELETE CASCADE,
+  exercise_id UUID REFERENCES exercises(id),
+  order_index INT NOT NULL,
+  default_sets INT NOT NULL DEFAULT 1
+);
+
+ALTER TABLE workout_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workout_template_exercises ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see own templates"
+  ON workout_templates FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users see own template exercises"
+  ON workout_template_exercises FOR ALL
+  USING (template_id IN (SELECT id FROM workout_templates WHERE user_id = auth.uid()));
+
 -- Seed common exercises
 INSERT INTO exercises (name, muscle_group, type) VALUES
   ('Bench Press', 'chest', 'strength'),
