@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <>
       {/* Top bar */}
-      <nav className="border-b border-slate-800 bg-slate-950 px-4 py-3">
+      <nav className="border-b border-slate-800 bg-slate-900 px-4 py-3">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div className="flex items-center gap-6">
             <span className="text-lg font-bold text-slate-100">RimerFit</span>
@@ -37,7 +37,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-950 sm:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900 sm:hidden">
         <div className="flex">
           <NavLink to="/" end className={bottomLinkCls}>
             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
