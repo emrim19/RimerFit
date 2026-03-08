@@ -101,6 +101,7 @@ export default function WorkoutDetail() {
 
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
+  const [editDate, setEditDate] = useState('')
   const [editGroups, setEditGroups] = useState<EditGroup[]>([])
   const [saving, setSaving] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -151,6 +152,7 @@ export default function WorkoutDetail() {
 
   function enterEdit() {
     setEditTitle(workout?.title ?? '')
+    setEditDate(workout?.date ?? '')
     setEditGroups(groups.map(g => ({ ...g, sets: g.sets.map(s => toEditSet(s)) })))
     setError(null)
     setEditing(true)
@@ -203,7 +205,7 @@ export default function WorkoutDetail() {
     try {
       const { error: titleErr } = await supabase
         .from('workouts')
-        .update({ title: editTitle.trim() || null })
+        .update({ title: editTitle.trim() || null, date: editDate })
         .eq('id', id!)
       if (titleErr) throw new Error(titleErr.message)
 
@@ -280,16 +282,24 @@ export default function WorkoutDetail() {
       {/* Header */}
       <div className="mb-6">
         {editing ? (
-          <input
-            value={editTitle}
-            onChange={e => setEditTitle(e.target.value)}
-            placeholder="Workout title"
-            className={`w-full text-2xl font-bold ${inputCls}`}
-          />
+          <>
+            <input
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              placeholder="Workout title"
+              className={`w-full text-2xl font-bold ${inputCls}`}
+            />
+            <input
+              type="date"
+              value={editDate}
+              onChange={e => setEditDate(e.target.value)}
+              className={`mt-2 ${inputCls}`}
+            />
+          </>
         ) : (
           <h1 className="text-2xl font-bold text-gray-900">{workout?.title ?? 'Workout'}</h1>
         )}
-        <p className="mt-1 text-sm text-gray-500">{workout && formatDate(workout.date)}</p>
+        {!editing && <p className="mt-1 text-sm text-gray-500">{workout && formatDate(workout.date)}</p>}
       </div>
 
       {/* Rest day banner */}
