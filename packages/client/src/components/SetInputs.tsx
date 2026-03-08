@@ -13,7 +13,7 @@ export function emptySet(): SetRow {
 }
 
 export const inputCls =
-  'min-w-0 flex-1 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+  'min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
 
 export function setTypeLabel(type: ExerciseType) {
   if (type === 'cardio') return 'min · km'

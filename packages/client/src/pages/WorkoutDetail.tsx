@@ -200,14 +200,19 @@ export default function WorkoutDetail() {
     setSaving(true)
     setError(null)
     try {
-      await supabase.from('workouts').update({ title: editTitle.trim() || null }).eq('id', id!)
+      const { error: titleErr } = await supabase
+        .from('workouts')
+        .update({ title: editTitle.trim() || null })
+        .eq('id', id!)
+      if (titleErr) throw new Error(titleErr.message)
 
       const originalIds = new Set(groups.flatMap(g => g.sets.map(s => s.id)))
       const keptIds = new Set(editGroups.flatMap(g => g.sets.map(s => s.id).filter(Boolean)))
       const deletedIds = [...originalIds].filter(sid => !keptIds.has(sid))
 
       if (deletedIds.length > 0) {
-        await supabase.from('workout_sets').delete().in('id', deletedIds)
+        const { error: delErr } = await supabase.from('workout_sets').delete().in('id', deletedIds)
+        if (delErr) throw new Error(delErr.message)
       }
 
       const toUpsert = editGroups.flatMap(g =>
@@ -227,7 +232,8 @@ export default function WorkoutDetail() {
       )
 
       if (toUpsert.length > 0) {
-        await supabase.from('workout_sets').upsert(toUpsert)
+        const { error: upsertErr } = await supabase.from('workout_sets').upsert(toUpsert)
+        if (upsertErr) throw new Error(upsertErr.message)
       }
 
       await load()
