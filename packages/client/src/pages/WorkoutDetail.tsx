@@ -215,11 +215,11 @@ export default function WorkoutDetail() {
         if (delErr) throw new Error(delErr.message)
       }
 
-      const toUpsert = editGroups.flatMap(g =>
+      const allSets = editGroups.flatMap(g =>
         g.sets
           .filter(s => s.reps || s.weight_kg || s.duration_minutes || s.distance_km || s.rpe)
           .map((s, si) => ({
-            ...(s.id ? { id: s.id } : {}),
+            id: s.id || null,
             workout_id: id!,
             exercise_id: g.exercise_id,
             set_number: si + 1,
@@ -231,9 +231,17 @@ export default function WorkoutDetail() {
           }))
       )
 
-      if (toUpsert.length > 0) {
-        const { error: upsertErr } = await supabase.from('workout_sets').upsert(toUpsert)
-        if (upsertErr) throw new Error(upsertErr.message)
+      const toUpdate = allSets.filter(s => s.id !== null)
+      const toInsert = allSets.filter(s => s.id === null).map(({ id: _id, ...rest }) => rest)
+
+      if (toUpdate.length > 0) {
+        const { error: updateErr } = await supabase.from('workout_sets').upsert(toUpdate)
+        if (updateErr) throw new Error(updateErr.message)
+      }
+
+      if (toInsert.length > 0) {
+        const { error: insertErr } = await supabase.from('workout_sets').insert(toInsert)
+        if (insertErr) throw new Error(insertErr.message)
       }
 
       await load()
