@@ -14,6 +14,7 @@ interface WorkoutMeta {
   title: string | null
   date: string
   duration_minutes: number | null
+  is_rest_day: boolean
 }
 
 interface SetDetail {
@@ -113,7 +114,7 @@ export default function WorkoutDetail() {
 
   const load = useCallback(async () => {
     const [{ data: w, error: wErr }, { data: setsData, error: sErr }] = await Promise.all([
-      supabase.from('workouts').select('id, title, date, duration_minutes').eq('id', id!).single(),
+      supabase.from('workouts').select('id, title, date, duration_minutes, is_rest_day').eq('id', id!).single(),
       supabase
         .from('workout_sets')
         .select('id, set_number, reps, weight_kg, duration_seconds, distance_meters, rpe, exercises(id, name, type)')
@@ -291,8 +292,17 @@ export default function WorkoutDetail() {
         <p className="mt-1 text-sm text-gray-500">{workout && formatDate(workout.date)}</p>
       </div>
 
+      {/* Rest day banner */}
+      {workout?.is_rest_day && (
+        <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-6 text-center">
+          <p className="text-2xl">😴</p>
+          <p className="mt-2 font-medium text-gray-700">Rest Day</p>
+          <p className="mt-1 text-sm text-gray-400">Recovery counts.</p>
+        </div>
+      )}
+
       {/* Exercise groups */}
-      <div className="space-y-4">
+      {!workout?.is_rest_day && <div className="space-y-4">
         {(editing ? editGroups : groups).map((group, gi) => (
           <div key={group.exercise_id} className="rounded-xl border border-gray-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between">
@@ -341,9 +351,9 @@ export default function WorkoutDetail() {
             )}
           </div>
         ))}
-      </div>
+      </div>}
 
-      {editing && (
+      {!workout?.is_rest_day && editing && (
         <button
           onClick={() => setPickerOpen(true)}
           className="mt-3 w-full rounded-xl border border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"

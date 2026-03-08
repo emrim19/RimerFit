@@ -6,6 +6,7 @@ export interface Workout {
   date: string
   title: string | null
   duration_minutes: number | null
+  is_rest_day: boolean
 }
 
 export function useWorkouts(limit?: number) {
@@ -16,7 +17,7 @@ export function useWorkouts(limit?: number) {
   useEffect(() => {
     let query = supabase
       .from('workouts')
-      .select('id, date, title, duration_minutes')
+      .select('id, date, title, duration_minutes, is_rest_day')
       .order('date', { ascending: false })
 
     if (limit) query = query.limit(limit)

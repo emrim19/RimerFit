@@ -22,6 +22,7 @@ export default function LogWorkout() {
   const { exercises, refetch } = useExercises()
   const navigate = useNavigate()
 
+  const [isRestDay, setIsRestDay] = useState(false)
   const [title, setTitle] = useState('')
   const [entries, setEntries] = useState<ExerciseEntry[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -94,7 +95,7 @@ export default function LogWorkout() {
   }
 
   async function handleSave() {
-    if (entries.length === 0) {
+    if (!isRestDay && entries.length === 0) {
       setError('Add at least one exercise before saving.')
       return
     }
@@ -109,6 +110,7 @@ export default function LogWorkout() {
           user_id: user!.id,
           title: title.trim() || null,
           date: new Date().toISOString().slice(0, 10),
+          is_rest_day: isRestDay,
         })
         .select('id')
         .single()
@@ -146,19 +148,44 @@ export default function LogWorkout() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Log workout</h1>
 
+      {/* Type selector */}
+      <div className="mb-6 flex gap-2">
+        {(['workout', 'rest'] as const).map(type => (
+          <button
+            key={type}
+            onClick={() => setIsRestDay(type === 'rest')}
+            className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
+              (type === 'rest') === isRestDay
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+            }`}
+          >
+            {type === 'workout' ? 'Workout' : 'Rest Day'}
+          </button>
+        ))}
+      </div>
+
       {/* Title */}
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Workout title (optional)"
+          placeholder={isRestDay ? 'Note (optional)' : 'Workout title (optional)'}
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
+      {isRestDay && (
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white px-4 py-6 text-center">
+          <p className="text-2xl">😴</p>
+          <p className="mt-2 font-medium text-gray-700">Rest Day</p>
+          <p className="mt-1 text-sm text-gray-400">Recovery counts — this will keep your streak alive.</p>
+        </div>
+      )}
+
       {/* Exercise entries */}
-      <div className="space-y-4">
+      {!isRestDay && <div className="space-y-4">
         {entries.map((entry, ei) => (
           <div key={entry.exercise_id} className="rounded-xl border border-gray-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between">
@@ -201,25 +228,27 @@ export default function LogWorkout() {
             </button>
           </div>
         ))}
-      </div>
+      </div>}
 
-      {/* Add exercise */}
-      <button
-        onClick={() => setPickerOpen(true)}
-        className="mt-4 w-full rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"
-      >
-        + Add exercise
-      </button>
+      {!isRestDay && <>
+        {/* Add exercise */}
+        <button
+          onClick={() => setPickerOpen(true)}
+          className="mt-4 w-full rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-500"
+        >
+          + Add exercise
+        </button>
 
-      {pickerOpen && (
-        <ExercisePicker
-          exercises={exercises}
-          addedIds={addedIds}
-          onSelect={addExercise}
-          onCreate={handleCreateExercise}
-          onClose={() => setPickerOpen(false)}
-        />
-      )}
+        {pickerOpen && (
+          <ExercisePicker
+            exercises={exercises}
+            addedIds={addedIds}
+            onSelect={addExercise}
+            onCreate={handleCreateExercise}
+            onClose={() => setPickerOpen(false)}
+          />
+        )}
+      </>}
 
       {/* Error + save */}
       <div className="mt-8 space-y-3">
@@ -236,7 +265,7 @@ export default function LogWorkout() {
             disabled={saving}
             className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? 'Saving…' : 'Save workout'}
+            {saving ? 'Saving…' : isRestDay ? 'Log rest day' : 'Save workout'}
           </button>
         </div>
       </div>

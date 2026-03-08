@@ -52,7 +52,7 @@ export function useDashboardStats() {
 
       // Run independent queries in parallel
       const [weekWorkoutsRes, allDatesRes, bodyWeightRes] = await Promise.all([
-        supabase.from('workouts').select('id').gte('date', startOfWeek),
+        supabase.from('workouts').select('id').gte('date', startOfWeek).eq('is_rest_day', false),
         supabase.from('workouts').select('date'),
         supabase
           .from('body_metrics')

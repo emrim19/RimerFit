@@ -179,6 +179,7 @@ CREATE TABLE workouts (
   title TEXT,
   notes TEXT,
   duration_minutes INT,
+  is_rest_day BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

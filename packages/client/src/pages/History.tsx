@@ -82,14 +82,23 @@ export default function History() {
                 <li key={w.id}>
                   <Link
                     to={`/workout/${w.id}`}
-                    className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                    className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${
+                      w.is_rest_day
+                        ? 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                    }`}
                   >
                     <div>
-                      <p className="font-medium text-gray-900">{w.title ?? 'Workout'}</p>
+                      <div className="flex items-center gap-2">
+                        {w.is_rest_day && <span className="text-base leading-none">😴</span>}
+                        <p className="font-medium text-gray-900">
+                          {w.is_rest_day ? (w.title ?? 'Rest Day') : (w.title ?? 'Workout')}
+                        </p>
+                      </div>
                       <p className="text-sm text-gray-400">{formatDay(w.date)}</p>
                     </div>
                     <span className="text-sm text-gray-400">
-                      {w.duration_minutes ? `${w.duration_minutes} min` : '›'}
+                      {w.is_rest_day ? '😴' : w.duration_minutes ? `${w.duration_minutes} min` : '›'}
                     </span>
                   </Link>
                 </li>
