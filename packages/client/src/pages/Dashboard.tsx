@@ -219,6 +219,9 @@ export default function Dashboard() {
                 >
                   <div>
                     <div className="flex items-center gap-2">
+                      {w.color && !w.is_rest_day && (
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: w.color }} />
+                      )}
                       {w.is_rest_day && <span className="text-base leading-none">😴</span>}
                       <p className="font-medium text-slate-100">
                         {w.is_rest_day ? (w.title ?? 'Rest Day') : (w.title ?? 'Workout')}

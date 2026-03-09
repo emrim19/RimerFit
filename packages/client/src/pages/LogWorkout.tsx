@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -10,6 +10,81 @@ import ExercisePicker from '../components/ExercisePicker'
 import TemplatePicker from '../components/TemplatePicker'
 import { SetInputs, emptySet, setTypeLabel } from '../components/SetInputs'
 import type { SetRow } from '../components/SetInputs'
+
+const PRESET_COLORS = [
+  '#ef4444', '#f97316', '#f59e0b', '#84cc16',
+  '#22c55e', '#14b8a6', '#3b82f6', '#0ea5e9',
+  '#6366f1', '#8b5cf6', '#ec4899', '#64748b',
+]
+
+function WorkoutColorDot({
+  color,
+  onChange,
+}: {
+  color: string | null
+  onChange: (c: string | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        title={color ? 'Change workout colour' : 'Add workout colour'}
+        onClick={() => setOpen(o => !o)}
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 transition-colors hover:border-slate-500"
+      >
+        <span
+          className="h-4 w-4 rounded-full"
+          style={{ backgroundColor: color ?? '#334155' }}
+        />
+      </button>
+      {open && (
+        <div
+          ref={null}
+          className="absolute left-0 top-10 z-20 w-52 rounded-2xl border border-slate-700 bg-slate-800/95 p-3 shadow-2xl backdrop-blur-sm"
+          onClick={e => e.stopPropagation()}
+        >
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Workout colour</p>
+          <div className="grid grid-cols-4 gap-2">
+            {PRESET_COLORS.map(c => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => { onChange(c); setOpen(false) }}
+                className="h-6 w-6 rounded-full transition-transform hover:scale-110"
+                style={{
+                  backgroundColor: c,
+                  outline: color === c ? `2px solid ${c}` : undefined,
+                  outlineOffset: color === c ? '2px' : undefined,
+                }}
+              />
+            ))}
+          </div>
+          {color && (
+            <button
+              type="button"
+              onClick={() => { onChange(null); setOpen(false) }}
+              className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
+            >
+              Remove colour
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 type ExerciseType = Exercise['type']
 
@@ -28,6 +103,7 @@ export default function LogWorkout() {
 
   const [isRestDay, setIsRestDay] = useState(false)
   const [title, setTitle] = useState('')
+  const [workoutColor, setWorkoutColor] = useState<string | null>(null)
   const [entries, setEntries] = useState<ExerciseEntry[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
@@ -45,6 +121,7 @@ export default function LogWorkout() {
   // ── Template actions ────────────────────────────────────────
 
   function loadTemplate(template: WorkoutTemplate) {
+    if (template.color) setWorkoutColor(template.color)
     setEntries(
       template.exercises.map(te => ({
         exercise_id: te.exercise_id,
@@ -53,6 +130,11 @@ export default function LogWorkout() {
         sets: Array.from({ length: te.default_sets }, () => emptySet()),
       }))
     )
+  }
+
+  async function handleTemplateColorChange(id: string, color: string) {
+    await supabase.from('workout_templates').update({ color }).eq('id', id)
+    await refetchTemplates()
   }
 
   async function handleSaveTemplate() {
@@ -178,6 +260,7 @@ export default function LogWorkout() {
           title: title.trim() || null,
           date: new Date().toISOString().slice(0, 10),
           is_rest_day: isRestDay,
+          color: workoutColor,
         })
         .select('id')
         .single()
@@ -234,15 +317,16 @@ export default function LogWorkout() {
         ))}
       </div>
 
-      {/* Title */}
-      <div className="mb-4">
+      {/* Title + color */}
+      <div className="mb-4 flex items-center gap-2">
         <input
           type="text"
           placeholder={isRestDay ? 'Note (optional)' : 'Workout title (optional)'}
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
+        <WorkoutColorDot color={workoutColor} onChange={setWorkoutColor} />
       </div>
 
       {/* Use template button (workout mode only) */}
@@ -375,6 +459,7 @@ export default function LogWorkout() {
               templates={templates}
               onSelect={loadTemplate}
               onDelete={handleDeleteTemplate}
+              onColorChange={handleTemplateColorChange}
               onClose={() => setTemplatePickerOpen(false)}
             />
           )}

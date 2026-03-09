@@ -13,6 +13,7 @@ export interface TemplateExercise {
 export interface WorkoutTemplate {
   id: string
   name: string
+  color: string | null
   exercises: TemplateExercise[]
 }
 
@@ -23,12 +24,13 @@ export function useTemplates() {
   const fetch = useCallback(async () => {
     const { data } = await supabase
       .from('workout_templates')
-      .select('id, name, workout_template_exercises(exercise_id, order_index, default_sets, exercises(id, name, type))')
+      .select('id, name, color, workout_template_exercises(exercise_id, order_index, default_sets, exercises(id, name, type))')
       .order('created_at', { ascending: false })
 
     const parsed: WorkoutTemplate[] = (data ?? []).map((t: any) => ({
       id: t.id,
       name: t.name,
+      color: t.color ?? null,
       exercises: (t.workout_template_exercises ?? [])
         .sort((a: any, b: any) => a.order_index - b.order_index)
         .map((te: any) => {
