@@ -4,7 +4,7 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { useDashboardStats } from '../hooks/useDashboardStats'
 import { usePersonalRecords } from '../hooks/usePersonalRecords'
 import { useMuscleGroupVolume } from '../hooks/useMuscleGroupVolume'
-import type { MuscleVolumePeriod } from '../hooks/useMuscleGroupVolume'
+import type { MuscleVolumePeriod, MuscleGroupData } from '../hooks/useMuscleGroupVolume'
 import { useMuscleGroupColors } from '../hooks/useMuscleGroupColors'
 
 function formatDate(dateStr: string) {
@@ -20,11 +20,32 @@ function formatVolume(kg: number): string {
   return Math.round(kg).toLocaleString()
 }
 
+type MuscleMetric = 'volume' | 'sets' | 'reps' | 'sessions'
+
+const MUSCLE_METRICS: { metric: MuscleMetric; label: string }[] = [
+  { metric: 'volume',   label: 'Volume'   },
+  { metric: 'sets',     label: 'Sets'     },
+  { metric: 'reps',     label: 'Reps'     },
+  { metric: 'sessions', label: 'Sessions' },
+]
+
+function metricValue(g: MuscleGroupData, metric: MuscleMetric): number {
+  return metric === 'volume' ? g.volume : metric === 'sets' ? g.sets : metric === 'reps' ? g.reps : g.sessions
+}
+
+function formatMetricValue(val: number, metric: MuscleMetric): string {
+  if (metric === 'volume') return `${formatVolume(val)} kg`
+  if (metric === 'sets')   return `${val} set${val !== 1 ? 's' : ''}`
+  if (metric === 'reps')   return `${val.toLocaleString()} rep${val !== 1 ? 's' : ''}`
+  return `${val} session${val !== 1 ? 's' : ''}`
+}
+
 export default function Dashboard() {
   const { workouts, loading, error } = useWorkouts(10)
   const { stats } = useDashboardStats()
   const { records: prs } = usePersonalRecords()
   const [volumePeriod, setVolumePeriod] = useState<MuscleVolumePeriod>('week')
+  const [muscleMetric, setMuscleMetric] = useState<MuscleMetric>('volume')
   const { data: muscleVolume, loading: muscleLoading } = useMuscleGroupVolume(volumePeriod)
   const { getColor } = useMuscleGroupColors()
 
@@ -119,11 +140,11 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* Muscle group volume */}
+      {/* Muscle group breakdown */}
       <section className="mb-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Volume by muscle
+            By muscle
           </h2>
           <div className="flex rounded-lg border border-slate-700 p-0.5 text-xs font-medium">
             {(['week', '4weeks'] as MuscleVolumePeriod[]).map(p => (
@@ -140,52 +161,72 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Metric toggle */}
+        <div className="mb-3 flex rounded-lg border border-slate-700 p-0.5 text-xs font-medium">
+          {MUSCLE_METRICS.map(({ metric, label }) => (
+            <button
+              key={metric}
+              onClick={() => setMuscleMetric(metric)}
+              className={`flex-1 rounded-md px-2 py-1.5 transition-colors ${
+                muscleMetric === metric ? 'bg-slate-700 text-slate-100' : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="rounded-xl border border-slate-700 bg-slate-900 p-4">
           {muscleLoading ? (
             <p className="text-sm text-slate-500">Loading…</p>
           ) : muscleVolume.length === 0 ? (
-            <p className="text-sm text-slate-500">No strength data for this period.</p>
+            <p className="text-sm text-slate-500">No data for this period.</p>
           ) : (
             <>
-              {/* Segmented bar */}
-              <div className="mb-4 flex h-3 w-full overflow-hidden rounded-full">
-                {(() => {
-                  const total = muscleVolume.reduce((s, g) => s + g.volume, 0)
-                  return muscleVolume.map(g => (
-                    <div
-                      key={g.group}
-                      title={`${g.group}: ${Math.round(g.volume).toLocaleString()} kg`}
-                      style={{ width: `${(g.volume / total) * 100}%`, backgroundColor: getColor(g.group) }}
-                    />
-                  ))
-                })()}
-              </div>
-
-              {/* Per-group rows */}
-              <ul className="space-y-2.5">
-                {muscleVolume.map(g => {
-                  const total = muscleVolume.reduce((s, x) => s + x.volume, 0)
-                  const pct = Math.round((g.volume / total) * 100)
-                  return (
-                    <li key={g.group} className="flex items-center gap-3">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: getColor(g.group) }}
-                      />
-                      <span className="w-20 shrink-0 text-sm capitalize text-slate-300">{g.group}</span>
-                      <div className="flex-1 overflow-hidden rounded-full bg-slate-800">
+              {(() => {
+                const sorted = [...muscleVolume].sort((a, b) => metricValue(b, muscleMetric) - metricValue(a, muscleMetric))
+                const total = sorted.reduce((s, g) => s + metricValue(g, muscleMetric), 0)
+                return (
+                  <>
+                    {/* Segmented bar */}
+                    <div className="mb-4 flex h-3 w-full overflow-hidden rounded-full">
+                      {sorted.map(g => (
                         <div
-                          className="h-1.5 rounded-full transition-all"
-                          style={{ width: `${pct}%`, backgroundColor: getColor(g.group) }}
+                          key={g.group}
+                          title={`${g.group}: ${formatMetricValue(metricValue(g, muscleMetric), muscleMetric)}`}
+                          style={{ width: `${(metricValue(g, muscleMetric) / total) * 100}%`, backgroundColor: getColor(g.group) }}
                         />
-                      </div>
-                      <span className="w-16 shrink-0 text-right text-xs text-slate-500">
-                        {formatVolume(g.volume)} kg
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
+                      ))}
+                    </div>
+
+                    {/* Per-group rows */}
+                    <ul className="space-y-2.5">
+                      {sorted.map(g => {
+                        const val = metricValue(g, muscleMetric)
+                        const pct = Math.round((val / total) * 100)
+                        return (
+                          <li key={g.group} className="flex items-center gap-3">
+                            <span
+                              className="h-2.5 w-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: getColor(g.group) }}
+                            />
+                            <span className="w-20 shrink-0 text-sm capitalize text-slate-300">{g.group}</span>
+                            <div className="flex-1 overflow-hidden rounded-full bg-slate-800">
+                              <div
+                                className="h-1.5 rounded-full transition-all"
+                                style={{ width: `${pct}%`, backgroundColor: getColor(g.group) }}
+                              />
+                            </div>
+                            <span className="w-20 shrink-0 text-right text-xs text-slate-500">
+                              {formatMetricValue(val, muscleMetric)}
+                            </span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </>
+                )
+              })()}
             </>
           )}
         </div>
