@@ -80,6 +80,7 @@ interface WorkoutMeta {
   date: string
   duration_minutes: number | null
   is_rest_day: boolean
+  color: string | null
 }
 
 interface SetDetail {
@@ -170,6 +171,7 @@ export default function WorkoutDetail() {
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDate, setEditDate] = useState('')
+  const [editColor, setEditColor] = useState<string | null>(null)
   const [editGroups, setEditGroups] = useState<EditGroup[]>([])
   const [saving, setSaving] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -191,7 +193,7 @@ export default function WorkoutDetail() {
 
   const load = useCallback(async () => {
     const [{ data: w, error: wErr }, { data: setsData, error: sErr }] = await Promise.all([
-      supabase.from('workouts').select('id, title, date, duration_minutes, is_rest_day').eq('id', id!).single(),
+      supabase.from('workouts').select('id, title, date, duration_minutes, is_rest_day, color').eq('id', id!).single(),
       supabase
         .from('workout_sets')
         .select('id, set_number, reps, weight_kg, duration_seconds, distance_meters, rpe, exercises(id, name, type, muscle_group)')
@@ -229,6 +231,7 @@ export default function WorkoutDetail() {
   function enterEdit() {
     setEditTitle(workout?.title ?? '')
     setEditDate(workout?.date ?? '')
+    setEditColor(workout?.color ?? null)
     setEditGroups(groups.map(g => ({ ...g, sets: g.sets.map(s => toEditSet(s)) })))
     setError(null)
     setEditing(true)
@@ -281,7 +284,7 @@ export default function WorkoutDetail() {
     try {
       const { error: titleErr } = await supabase
         .from('workouts')
-        .update({ title: editTitle.trim() || null, date: editDate })
+        .update({ title: editTitle.trim() || null, date: editDate, color: editColor })
         .eq('id', id!)
       if (titleErr) throw new Error(titleErr.message)
 
@@ -393,12 +396,15 @@ export default function WorkoutDetail() {
       <div className="mb-6">
         {editing ? (
           <>
-            <input
-              value={editTitle}
-              onChange={e => setEditTitle(e.target.value)}
-              placeholder="Workout title"
-              className={`w-full text-2xl font-bold ${inputCls}`}
-            />
+            <div className="flex items-center gap-2">
+              <input
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                placeholder="Workout title"
+                className={`min-w-0 flex-1 text-2xl font-bold ${inputCls}`}
+              />
+              <ColorSwatch color={editColor} onChange={setEditColor} />
+            </div>
             <input
               type="date"
               value={editDate}
