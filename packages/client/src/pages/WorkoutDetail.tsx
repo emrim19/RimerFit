@@ -1,12 +1,76 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 import { SetInputs, emptySet, setTypeLabel, inputCls } from '../components/SetInputs'
 import type { SetRow, ExerciseType } from '../components/SetInputs'
 import ExercisePicker from '../components/ExercisePicker'
 import { useExercises } from '../hooks/useExercises'
 import type { Exercise } from '../hooks/useExercises'
 import { useMuscleGroupColors } from '../hooks/useMuscleGroupColors'
+
+// ── Template colour swatch picker ─────────────────────────────
+
+const PRESET_COLORS = [
+  '#ef4444', '#f97316', '#f59e0b', '#84cc16',
+  '#22c55e', '#14b8a6', '#3b82f6', '#0ea5e9',
+  '#6366f1', '#8b5cf6', '#ec4899', '#64748b',
+]
+
+function ColorSwatch({
+  color,
+  onChange,
+}: {
+  color: string | null
+  onChange: (c: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        title="Pick a colour"
+        onClick={() => setOpen(o => !o)}
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 transition-colors hover:border-slate-500"
+      >
+        <span className="h-4 w-4 rounded-full" style={{ backgroundColor: color ?? '#334155' }} />
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 top-10 z-20 w-44 rounded-2xl border border-slate-700 bg-slate-800/95 p-3 shadow-2xl backdrop-blur-sm"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="grid grid-cols-4 gap-2">
+            {PRESET_COLORS.map(c => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => { onChange(c); setOpen(false) }}
+                className="h-6 w-6 rounded-full transition-transform hover:scale-110"
+                style={{
+                  backgroundColor: c,
+                  outline: color === c ? `2px solid ${c}` : undefined,
+                  outlineOffset: color === c ? '2px' : undefined,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 // ── Data types ────────────────────────────────────────────────
 
@@ -96,6 +160,7 @@ function toEditSet(s: SetDetail): EditSet {
 export default function WorkoutDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const [workout, setWorkout] = useState<WorkoutMeta | null>(null)
   const [groups, setGroups] = useState<ExerciseGroup[]>([])
@@ -114,6 +179,13 @@ export default function WorkoutDetail() {
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateColor, setTemplateColor] = useState<string | null>(null)
+  const [savingTemplate, setSavingTemplate] = useState(false)
+  const [templateError, setTemplateError] = useState<string | null>(null)
+  const [templateSaved, setTemplateSaved] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
 
@@ -260,6 +332,40 @@ export default function WorkoutDetail() {
     }
   }
 
+  // ── Save as template ────────────────────────────────────────
+
+  async function handleSaveAsTemplate() {
+    if (!templateName.trim()) { setTemplateError('Enter a name for this template.'); return }
+    setSavingTemplate(true)
+    setTemplateError(null)
+    try {
+      const { data: tmpl, error: tmplErr } = await supabase
+        .from('workout_templates')
+        .insert({ user_id: user!.id, name: templateName.trim(), color: templateColor })
+        .select('id')
+        .single()
+      if (tmplErr) throw tmplErr
+
+      const rows = groups.map((g, i) => ({
+        template_id: tmpl.id,
+        exercise_id: g.exercise_id,
+        order_index: i,
+        default_sets: g.sets.length,
+      }))
+      const { error: exErr } = await supabase.from('workout_template_exercises').insert(rows)
+      if (exErr) throw exErr
+
+      setTemplateSaved(true)
+      setShowSaveTemplate(false)
+      setTemplateName('')
+      setTemplateColor(null)
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : 'Failed to save template')
+    } finally {
+      setSavingTemplate(false)
+    }
+  }
+
   // ── Delete ──────────────────────────────────────────────────
 
   async function handleDelete() {
@@ -383,6 +489,52 @@ export default function WorkoutDetail() {
       )}
 
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+
+      {/* Save as template (view mode, non-rest-day) */}
+      {!editing && !workout?.is_rest_day && (
+        <div className="mt-6">
+          {templateSaved ? (
+            <p className="text-sm text-green-400">Template saved!</p>
+          ) : showSaveTemplate ? (
+            <div className="rounded-xl border border-slate-700 bg-slate-900 p-4">
+              <p className="mb-3 text-sm font-medium text-slate-300">Save as template</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Template name…"
+                  value={templateName}
+                  onChange={e => setTemplateName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSaveAsTemplate()}
+                  autoFocus
+                  className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <ColorSwatch color={templateColor} onChange={setTemplateColor} />
+                <button
+                  onClick={handleSaveAsTemplate}
+                  disabled={savingTemplate}
+                  className="rounded-lg bg-blue-500 px-3 py-1.5 text-sm font-medium text-slate-950 hover:bg-blue-600 disabled:opacity-50"
+                >
+                  {savingTemplate ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  onClick={() => { setShowSaveTemplate(false); setTemplateName(''); setTemplateColor(null); setTemplateError(null) }}
+                  className="text-sm text-slate-500 hover:text-slate-300"
+                >
+                  Cancel
+                </button>
+              </div>
+              {templateError && <p className="mt-2 text-xs text-red-400">{templateError}</p>}
+            </div>
+          ) : (
+            <button
+              onClick={() => { setTemplateName(workout?.title ?? ''); setShowSaveTemplate(true) }}
+              className="text-sm text-slate-500 hover:text-slate-300"
+            >
+              Save as template
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="mt-8">
