@@ -11,6 +11,10 @@ const PRESET_COLORS = [
   '#dc2626', '#ea580c', '#16a34a', '#0891b2', '#2563eb', '#64748b',
 ]
 
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
 function groupKey(exercise: Exercise): string {
   return exercise.muscle_group?.toLowerCase() ?? 'cardio'
 }
@@ -87,6 +91,76 @@ function ColorDot({
               )
             })}
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Muscle group dropdown ──────────────────────────────────────
+
+function MuscleGroupSelect({
+  value,
+  options,
+  getColor,
+  onChange,
+}: {
+  value: string | null
+  options: string[]
+  getColor: (g: string) => string
+  onChange: (v: string | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm outline-none focus:border-blue-500"
+      >
+        {value ? (
+          <>
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: getColor(value) }} />
+            <span className="flex-1 text-left text-slate-100">{capitalize(value)}</span>
+          </>
+        ) : (
+          <span className="flex-1 text-left text-slate-500">None</span>
+        )}
+        <span className="text-xs text-slate-500">▾</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-xl">
+          <button
+            type="button"
+            onClick={() => { onChange(null); setOpen(false) }}
+            className={`flex w-full items-center px-3 py-2 text-sm ${value === null ? 'text-blue-400' : 'text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`}
+          >
+            <span className="flex-1 text-left">None</span>
+            {value === null && <span className="text-xs">✓</span>}
+          </button>
+          {options.map(opt => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => { onChange(opt); setOpen(false) }}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-sm ${value === opt ? 'text-blue-400' : 'text-slate-200 hover:bg-slate-700'}`}
+            >
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: getColor(opt) }} />
+              <span className="flex-1 text-left">{capitalize(opt)}</span>
+              {value === opt && <span className="text-xs">✓</span>}
+            </button>
+          ))}
         </div>
       )}
     </div>
@@ -284,6 +358,7 @@ function ManageExercisesView({
   onDelete: (id: string) => Promise<void>
   onBack: () => void
 }) {
+  const { getColor } = useMuscleGroupColors()
   const builtIn = exercises.filter(e => e.user_id === null)
   const custom = exercises.filter(e => e.user_id !== null)
 
@@ -392,18 +467,12 @@ function ManageExercisesView({
                     onChange={t => setEditData(d => ({ ...d, type: t, muscle_group: t === 'cardio' ? null : d.muscle_group }))}
                   />
                   {editData.type !== 'cardio' && (
-                    <>
-                      <input
-                        list="edit-muscle-group-options"
-                        placeholder="Muscle group (optional)"
-                        value={editData.muscle_group ?? ''}
-                        onChange={e => setEditData(d => ({ ...d, muscle_group: e.target.value.toLowerCase() || null }))}
-                        className="w-full rounded-md border border-slate-600 bg-slate-700 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-blue-500"
-                      />
-                      <datalist id="edit-muscle-group-options">
-                        {muscleGroupNames.map(g => <option key={g} value={g} />)}
-                      </datalist>
-                    </>
+                    <MuscleGroupSelect
+                      value={editData.muscle_group}
+                      options={muscleGroupNames}
+                      getColor={getColor}
+                      onChange={v => setEditData(d => ({ ...d, muscle_group: v }))}
+                    />
                   )}
                   <div className="flex justify-end gap-2">
                     <button
@@ -426,7 +495,7 @@ function ManageExercisesView({
                   <div className="min-w-0 flex-1">
                     <span className="block truncate text-sm text-slate-200">{ex.name}</span>
                     <span className="text-xs capitalize text-slate-500">
-                      {ex.type}{ex.muscle_group ? ` · ${ex.muscle_group}` : ''}
+                      {ex.type}{ex.muscle_group ? ` · ${capitalize(ex.muscle_group)}` : ''}
                     </span>
                   </div>
                   <button
@@ -466,18 +535,12 @@ function ManageExercisesView({
               onChange={t => setNewData(d => ({ ...d, type: t, muscle_group: t === 'cardio' ? null : d.muscle_group }))}
             />
             {newData.type !== 'cardio' && (
-              <>
-                <input
-                  list="new-muscle-group-options"
-                  placeholder="Muscle group (optional)"
-                  value={newData.muscle_group ?? ''}
-                  onChange={e => setNewData(d => ({ ...d, muscle_group: e.target.value.toLowerCase() || null }))}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500"
-                />
-                <datalist id="new-muscle-group-options">
-                  {muscleGroupNames.map(g => <option key={g} value={g} />)}
-                </datalist>
-              </>
+              <MuscleGroupSelect
+                value={newData.muscle_group}
+                options={muscleGroupNames}
+                getColor={getColor}
+                onChange={v => setNewData(d => ({ ...d, muscle_group: v }))}
+              />
             )}
             <div className="flex gap-2">
               <button
@@ -512,7 +575,7 @@ function ManageExercisesView({
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-sm text-slate-300">{ex.name}</span>
                 <span className="text-xs capitalize text-slate-500">
-                  {ex.type}{ex.muscle_group ? ` · ${ex.muscle_group}` : ''}
+                  {ex.type}{ex.muscle_group ? ` · ${capitalize(ex.muscle_group)}` : ''}
                 </span>
               </div>
               <span className="text-xs text-slate-600">Built-in</span>
