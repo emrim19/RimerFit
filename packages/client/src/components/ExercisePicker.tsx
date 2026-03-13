@@ -492,6 +492,10 @@ function ManageExercisesView({
                 </div>
               ) : (
                 <div className="flex items-center gap-3 px-3 py-2.5">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: getColor(ex.muscle_group ?? ex.type) }}
+                  />
                   <div className="min-w-0 flex-1">
                     <span className="block truncate text-sm text-slate-200">{ex.name}</span>
                     <span className="text-xs capitalize text-slate-500">
@@ -572,6 +576,10 @@ function ManageExercisesView({
         <ul className="space-y-1">
           {builtIn.map(ex => (
             <li key={ex.id} className="flex items-center gap-3 rounded-lg px-3 py-2">
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: getColor(ex.muscle_group ?? ex.type) }}
+              />
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-sm text-slate-300">{ex.name}</span>
                 <span className="text-xs capitalize text-slate-500">
