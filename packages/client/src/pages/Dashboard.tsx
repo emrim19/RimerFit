@@ -23,10 +23,10 @@ function formatVolume(kg: number): string {
 type MuscleMetric = 'volume' | 'sets' | 'reps' | 'sessions'
 
 const MUSCLE_METRICS: { metric: MuscleMetric; label: string }[] = [
-  { metric: 'volume',   label: 'Volume'   },
   { metric: 'sets',     label: 'Sets'     },
   { metric: 'reps',     label: 'Reps'     },
   { metric: 'sessions', label: 'Sessions' },
+  { metric: 'volume',   label: 'Volume'   },
 ]
 
 function metricValue(g: MuscleGroupData, metric: MuscleMetric): number {
@@ -40,12 +40,28 @@ function formatMetricValue(val: number, metric: MuscleMetric): string {
   return `${val} session${val !== 1 ? 's' : ''}`
 }
 
+// For cardio groups: always show distance / speed; for bar proportion use sessions
+function isCardioGroup(g: MuscleGroupData): boolean {
+  return g.group === 'cardio'
+}
+
+function cardioLabel(g: MuscleGroupData): string {
+  const km = g.distance_km.toFixed(1)
+  if (g.avg_speed_kmh > 0) return `${km} km · ${g.avg_speed_kmh.toFixed(1)} km/h`
+  return `${km} km`
+}
+
+function barValue(g: MuscleGroupData, metric: MuscleMetric): number {
+  if (isCardioGroup(g)) return g.sessions
+  return metricValue(g, metric)
+}
+
 export default function Dashboard() {
   const { workouts, loading, error } = useWorkouts(10)
   const { stats } = useDashboardStats()
   const { records: prs } = usePersonalRecords()
   const [volumePeriod, setVolumePeriod] = useState<MuscleVolumePeriod>('week')
-  const [muscleMetric, setMuscleMetric] = useState<MuscleMetric>('volume')
+  const [muscleMetric, setMuscleMetric] = useState<MuscleMetric>('sets')
   const { data: muscleVolume, loading: muscleLoading } = useMuscleGroupVolume(volumePeriod)
   const { getColor } = useMuscleGroupColors()
 
@@ -184,8 +200,8 @@ export default function Dashboard() {
           ) : (
             <>
               {(() => {
-                const sorted = [...muscleVolume].sort((a, b) => metricValue(b, muscleMetric) - metricValue(a, muscleMetric))
-                const total = sorted.reduce((s, g) => s + metricValue(g, muscleMetric), 0)
+                const sorted = [...muscleVolume].sort((a, b) => barValue(b, muscleMetric) - barValue(a, muscleMetric))
+                const total = sorted.reduce((s, g) => s + barValue(g, muscleMetric), 0)
                 return (
                   <>
                     {/* Segmented bar */}
@@ -193,8 +209,8 @@ export default function Dashboard() {
                       {sorted.map(g => (
                         <div
                           key={g.group}
-                          title={`${g.group}: ${formatMetricValue(metricValue(g, muscleMetric), muscleMetric)}`}
-                          style={{ width: `${(metricValue(g, muscleMetric) / total) * 100}%`, backgroundColor: getColor(g.group) }}
+                          title={`${g.group}: ${isCardioGroup(g) ? cardioLabel(g) : formatMetricValue(metricValue(g, muscleMetric), muscleMetric)}`}
+                          style={{ width: `${(barValue(g, muscleMetric) / total) * 100}%`, backgroundColor: getColor(g.group) }}
                         />
                       ))}
                     </div>
@@ -202,8 +218,8 @@ export default function Dashboard() {
                     {/* Per-group rows */}
                     <ul className="space-y-2.5">
                       {sorted.map(g => {
-                        const val = metricValue(g, muscleMetric)
-                        const pct = Math.round((val / total) * 100)
+                        const bv = barValue(g, muscleMetric)
+                        const pct = Math.round((bv / total) * 100)
                         return (
                           <li key={g.group} className="flex items-center gap-3">
                             <span
@@ -218,7 +234,7 @@ export default function Dashboard() {
                               />
                             </div>
                             <span className="w-20 shrink-0 text-right text-xs text-slate-500">
-                              {formatMetricValue(val, muscleMetric)}
+                              {isCardioGroup(g) ? cardioLabel(g) : formatMetricValue(metricValue(g, muscleMetric), muscleMetric)}
                             </span>
                           </li>
                         )
