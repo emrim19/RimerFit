@@ -90,7 +90,7 @@ export default function Templates() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { templates, loading, refetch } = useTemplates()
-  const { exercises, refetch: refetchExercises } = useExercises()
+  const { exercises, refetch: refetchExercises, editExercise, deleteExercise } = useExercises()
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -376,6 +376,8 @@ export default function Templates() {
           addedIds={addedIds}
           onSelect={ex => { addExercise(ex); setPickerOpen(false) }}
           onCreate={createExercise}
+          onEdit={editExercise}
+          onDelete={deleteExercise}
           onClose={() => setPickerOpen(false)}
         />
       )}

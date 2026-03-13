@@ -98,7 +98,7 @@ interface ExerciseEntry {
 
 export default function LogWorkout() {
   const { user } = useAuth()
-  const { exercises, refetch } = useExercises()
+  const { exercises, refetch, editExercise, deleteExercise } = useExercises()
   const { templates, refetch: refetchTemplates } = useTemplates()
   const navigate = useNavigate()
 
@@ -451,6 +451,8 @@ export default function LogWorkout() {
               addedIds={addedIds}
               onSelect={addExercise}
               onCreate={handleCreateExercise}
+              onEdit={editExercise}
+              onDelete={deleteExercise}
               onClose={() => setPickerOpen(false)}
             />
           )}

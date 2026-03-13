@@ -177,7 +177,7 @@ export default function WorkoutDetail() {
   const [saving, setSaving] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  const { exercises, refetch: refetchExercises } = useExercises()
+  const { exercises, refetch: refetchExercises, editExercise, deleteExercise } = useExercises()
   const { getColor } = useMuscleGroupColors()
 
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -611,6 +611,8 @@ export default function WorkoutDetail() {
           addedIds={new Set(editGroups.map(g => g.exercise_id))}
           onSelect={addExerciseToEdit}
           onCreate={createExercise}
+          onEdit={editExercise}
+          onDelete={deleteExercise}
           onClose={() => setPickerOpen(false)}
         />
       )}
