@@ -162,14 +162,33 @@ MyFitnessApp/
 Run this in the Supabase SQL editor to set up the database.
 
 ```sql
--- Shared exercise library
+-- Exercise library (built-in + user-created)
 CREATE TABLE exercises (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   muscle_group TEXT,
   type TEXT DEFAULT 'strength', -- 'strength' | 'cardio' | 'bodyweight'
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- NULL = built-in default
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see shared and own exercises"
+  ON exercises FOR SELECT
+  USING (user_id IS NULL OR auth.uid() = user_id);
+
+CREATE POLICY "Users insert own exercises"
+  ON exercises FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users update own exercises"
+  ON exercises FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users delete own exercises"
+  ON exercises FOR DELETE
+  USING (auth.uid() = user_id);
 
 -- Workout sessions (one per gym visit)
 CREATE TABLE workouts (

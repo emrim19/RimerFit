@@ -271,7 +271,7 @@ export default function WorkoutDetail() {
   async function createExercise(data: { name: string; type: Exercise['type']; muscle_group: string | null }): Promise<Exercise> {
     const { data: created, error } = await supabase
       .from('exercises')
-      .insert(data)
+      .insert({ ...data, user_id: user!.id })
       .select('id, name, muscle_group, type')
       .single()
     if (error || !created) throw new Error(error?.message ?? 'Failed to create exercise')
